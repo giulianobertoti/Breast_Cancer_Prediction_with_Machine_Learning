@@ -18,7 +18,7 @@ The purpose of this system is to offer an aid to breast cancer prediction based 
  - Usability
 
 ## System Design
- - [Software Architecture](https://apps.dtic.mil/dtic/tr/fulltext/u2/a288963.pdf): to achieve the required privacy for the system, a [client-server software architecture] (https://robertheaton.com/2020/04/06/systems-design-for-advanced-beginners/) that is commonly used should be avoided. Patient data should not go to a server and, therefore, prediction should be made with technologies that allow inference on the client side.
+ - [Software Architecture](https://apps.dtic.mil/dtic/tr/fulltext/u2/a288963.pdf): to achieve the required privacy for the system, a [client-server software architecture](https://robertheaton.com/2020/04/06/systems-design-for-advanced-beginners/) that is commonly used should be avoided. Patient data should not go to a server and, therefore, prediction should be made with technologies that allow inference on the client side.
  - UI Design: To achieve a good user experience (UX), the system's usability project will be based on Jakob Nielsen's [10 usability heuristics](https://www.nngroup.com/articles/ten-usability-heuristics/).
 
 ## System Implementation
