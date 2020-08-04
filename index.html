@@ -1,0 +1,322 @@
+<html>
+<head>
+    
+    
+    <!-- https://cdnjs.com/libraries/tensorflow/ -->
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/1.7.4/tf.js"></script>
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+
+    <script>
+        
+        async function train(){
+            
+            
+            
+            const trainingUrl = 'wdbc-train.csv';
+            
+            
+            const trainingData = tf.data.csv(trainingUrl, {
+                
+                
+                columnConfigs: {
+                    diagnosis: {
+                        isLabel: true
+                    }
+                }
+                
+            });
+            
+            
+            const convertedTrainingData = trainingData.map(({xs, ys}) => {
+                      
+                      return{ xs: Object.values(xs), ys: Object.values(ys)};
+            }).batch(10);
+                  
+            const testingUrl = 'wdbc-test.csv';
+            
+            
+            const testingData = tf.data.csv(testingUrl, {
+                
+               
+                columnConfigs: {
+                    diagnosis: {
+                        isLabel: true
+                    }
+                }
+                
+            });
+            
+            
+            const convertedTestingData = testingData.map(({xs, ys}) => {
+                      
+                      return{ xs: Object.values(xs), ys: Object.values(ys)};
+            }).batch(10);
+                  
+
+            
+            const numOfFeatures = (await trainingData.columnNames()).length - 1;
+            
+                
+            
+            const model = tf.sequential();
+            
+            
+            model.add(tf.layers.dense({inputShape: [numOfFeatures], activation: "relu", units: 32}))
+            model.add(tf.layers.dense({activation: "sigmoid", units: 1}));
+            
+            
+             
+            model.compile({loss: "binaryCrossentropy", optimizer: "rmsprop", metrics: ['accuracy']});
+            
+            
+            await model.fitDataset(convertedTrainingData, 
+                             {epochs:3,
+                              validationData: convertedTestingData,
+                              callbacks:{
+                                  onEpochEnd: async(epoch, logs) =>{
+                                      console.log("Epoch: " + epoch + " Loss: " + logs.loss + " Accuracy: " + logs.acc);
+                                  }
+                              }});
+            await model.save('localstorage://my-model');
+            
+            $('#training').hide();
+            $('#prediction').show();
+            
+        }
+        train();
+        
+        async function predict(meanradius, meantexture, meanperimeter, meanarea, meansmoothness, meancompactness, meanconcavity, meanconcavepoints, meansymmetry, meanfractaldimension, seradius, setexture, seperimeter, searea, sesmoothness, secompactness, seconcavity, seconcavepoints, sesymmetry, sefractaldimension, worstradius, worsttexture, worstperimeter, worstarea, worstsmoothness, worstcompactness, worstconcavity, worstconcavepoints, worstsymmetry, worstfractaldimension){
+            
+            const model = await tf.loadLayersModel('localstorage://my-model');
+            
+            
+            const testVal = tf.tensor2d([parseFloat(meanradius), parseFloat(meantexture), parseFloat(meanperimeter), parseFloat(meanarea), parseFloat(meansmoothness), parseFloat(meancompactness), parseFloat(meanconcavity), parseFloat(meanconcavepoints), parseFloat(meansymmetry), parseFloat(meanfractaldimension), parseFloat(seradius), parseFloat(setexture), parseFloat(seperimeter), parseFloat(searea), parseFloat(sesmoothness), parseFloat(secompactness), parseFloat(seconcavity), parseFloat(seconcavepoints), parseFloat(sesymmetry), parseFloat(sefractaldimension), parseFloat(worstradius), parseFloat(worsttexture), parseFloat(worstperimeter), parseFloat(worstarea), parseFloat(worstsmoothness), parseFloat(worstcompactness), parseFloat(worstconcavity), parseFloat(worstconcavepoints), parseFloat(worstsymmetry), parseFloat(worstfractaldimension)], [1, 30]);
+            
+            
+            
+            const prediction = model.predict(testVal);
+
+            
+            prediction.print();
+
+            const value = prediction.dataSync();
+
+            $('#result').show();
+            
+            if(value[0]>0.5){
+                $('#result').append('<span id="finalresult" class="text-danger">cancer</span>');
+            } else {
+                $('#result').append('<span id="finalresult" class="text-success">not cancer</span>');
+            }
+        }
+        
+        $(document).ready(function(){
+            
+            $('#prediction').hide();
+            $('#result').hide();
+            
+            $('#prediction').click(function(){
+                
+                $('#result #finalresult').remove();
+                
+                var meanradius = $("#meanradius").val();
+                var meantexture = $("#meantexture").val();
+                var meanperimeter = $("#meanperimeter").val();
+                var meanarea = $("#meanarea").val();
+                var meansmoothness = $("#meansmoothness").val();
+                var meancompactness = $("#meancompactness").val();
+                var meanconcavity = $("#meanconcavity").val();
+                var meanconcavepoints = $("#meanconcavepoints").val();
+                var meansymmetry = $("#meansymmetry").val();
+                var meanfractaldimension = $("#meanfractaldimension").val();
+                var seradius = $("#seradius").val();
+                var setexture = $("#setexture").val();
+                var seperimeter = $("#seperimeter").val();
+                var searea = $("#searea").val();
+                var sesmoothness = $("#sesmoothness").val();
+                var secompactness = $("#secompactness").val();
+                var seconcavity = $("#seconcavity").val();
+                var seconcavepoints = $("#seconcavepoints").val();
+                var sesymmetry = $("#sesymmetry").val();
+                var sefractaldimension = $("#sefractaldimension").val();
+                var worstradius = $("#worstradius").val();
+                var worsttexture = $("#worsttexture").val();
+                var worstperimeter = $("#worstperimeter").val();
+                var worstarea = $("#worstarea").val();
+                var worstsmoothness = $("#worstsmoothness").val();
+                var worstcompactness = $("#worstcompactness").val();
+                var worstconcavity = $("#worstconcavity").val();
+                var worstconcavepoints = $("#worstconcavepoints").val();
+                var worstsymmetry = $("#worstsymmetry").val();
+                var worstfractaldimension = $("#worstfractaldimension").val();
+                
+                predict(meanradius, meantexture, meanperimeter, meanarea, meansmoothness, meancompactness, meanconcavity, meanconcavepoints, meansymmetry, meanfractaldimension, seradius, setexture, seperimeter, searea, sesmoothness, secompactness, seconcavity, seconcavepoints, sesymmetry, sefractaldimension, worstradius, worsttexture, worstperimeter, worstarea, worstsmoothness, worstcompactness, worstconcavity, worstconcavepoints, worstsymmetry, worstfractaldimension);
+                
+                
+            });
+        });
+        
+        
+        
+    </script>
+    
+</head>
+    
+    
+<body>
+    
+    <div class="row">
+        <div class="col-2">
+            <label>meanradius</label>
+            <input id="meanradius" type="number" value="0.3815675768">
+        </div>
+        <div class="col-2">
+            <label>meantexture</label>
+            <input id="meantexture" type="number" value="-1.74824194">
+        </div>
+        <div class="col-2">
+            <label>meanperimeter</label>
+            <input id="meanperimeter" type="number" value="0.4398250588">
+        </div>
+        <div class="col-2">
+            <label>meanarea</label>
+            <input id="meanarea" type="number" value="0.2322171451">
+        </div>
+        <div class="col-2">
+            <label>meansmoothness</label>
+            <input id="meansmoothness" type="number" value="2.124655378">
+        </div>
+        <div class="col-2">
+            <label>meancompactness</label>
+            <input id="meancompactness" type="number" value="1.034636699">
+        </div>
+    </div>
+    
+    
+    
+    <div class="row">
+        <div class="col-2">
+            <label>meanconcavity</label>
+            <input id="meanconcavity" type="number" value="1.488953499">
+        </div>
+        <div class="col-2">
+            <label>meanconcavepoints</label>
+            <input id="meanconcavepoints" type="number" value="1.582412838">
+        </div>
+        <div class="col-2">
+            <label>meansymmetry</label>
+            <input id="meansymmetry" type="number" value="0.5722379129">
+        </div>
+        <div class="col-2">
+            <label>meanfractaldimension</label>
+            <input id="meanfractaldimension" type="number" value="1.177740412">
+        </div>
+        <div class="col-2">
+            <label>seradius</label>
+            <input id="seradius" type="number" value="0.06469273885">
+        </div>
+        <div class="col-2">
+            <label>setexture</label>
+            <input id="setexture" type="number" value="-1.018869576">
+        </div>
+    </div>
+    
+    
+    <div class="row">
+        <div class="col-2">
+            <label>seperimeter</label>
+            <input id="seperimeter" type="number" value="-0.009946784933">
+        </div>
+        <div class="col-2">
+            <label>searea</label>
+            <input id="searea" type="number" value="0.09132907804">
+        </div>
+        <div class="col-2">
+            <label>sesmoothness</label>
+            <input id="sesmoothness" type="number" value="-0.5669326934">
+        </div>
+        <div class="col-2">
+            <label>secompactness</label>
+            <input id="secompactness" type="number" value="-0.1059561913">
+        </div>
+        <div class="col-2">
+            <label>seconcavity</label>
+            <input id="seconcavity" type="number" value="0.3719545727">
+        </div>
+        <div class="col-2">
+            <label>seconcavepoints</label>
+            <input id="seconcavepoints" type="number" value="0.2637457429">
+        </div>
+    </div>
+    
+    
+    <div class="row">
+        <div class="col-2">
+            <label>sesymmetry</label>
+            <input id="sesymmetry" type="number" value="-0.318201638">
+        </div>
+        <div class="col-2">
+            <label>sefractaldimension</label>
+            <input id="sefractaldimension" type="number" value="0.1755797923">
+        </div>
+        <div class="col-2">
+            <label>worstradius</label>
+            <input id="worstradius" type="number" value="0.5186922936">
+        </div>
+        <div class="col-2">
+            <label>worsttexture</label>
+            <input id="worsttexture" type="number" value="-1.394626457">
+        </div>
+        <div class="col-2">
+            <label>worstperimeter</label>
+            <input id="worstperimeter" type="number" value="0.5311131818">
+        </div>
+        <div class="col-2">
+            <label>worstarea</label>
+            <input id="worstarea" type="number" value="0.3769692998">
+        </div>
+    </div>
+    
+    
+    
+    <div class="row">
+        <div class="col-2">
+            <label>worstsmoothness</label>
+            <input id="worstsmoothness" type="number" value="0.9132726375">
+        </div>
+        <div class="col-2">
+            <label>worstcompactness</label>
+            <input id="worstcompactness" type="number" value="0.6959424879">
+        </div>
+        <div class="col-2">
+            <label>worstconcavity</label>
+            <input id="worstconcavity" type="number" value="1.582147395">
+        </div>
+        <div class="col-2">
+            <label>worstconcavepoints</label>
+            <input id="worstconcavepoints" type="number" value="1.046028789">
+        </div>
+        <div class="col-2">
+            <label>worstsymmetry</label>
+            <input id="worstsymmetry" type="number" value="0.4955949451">
+        </div>
+        <div class="col-2">
+            <label>worstfractaldimension</label>
+            <input id="worstfractaldimension" type="number" value="0.9839401465">
+        </div>
+    </div>
+
+    <br>
+    <button id="prediction" class="btn btn-primary col-md-2 offset-md-5">Make a Prediction</button>
+    <p id="training">training the application ... wait</p>
+    <br><br>
+    <p id="result" class="col-md-2 offset-md-5">Result: </p>
+    <br><br>
+    <p>*** This software is EXPERIMENTAL and should only be used for research purposes. Please see a doctor for any diagnostic reasons.</p>
+    
+</body>
+</html>
