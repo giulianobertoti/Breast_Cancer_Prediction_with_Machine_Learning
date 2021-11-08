@@ -35,6 +35,12 @@ Below, screens of the developed system:
 The accuracy of the system, when making predictions with the test set, was 98%.
 ![Training](screen3.png)
 
+## Videos and slides (in portuguese)
+
+Part 1: https://youtu.be/TunW47uhNdw
+
+Part 2: https://youtu.be/nOg1Cc3cWbo
+
 ## Note
 
 This system was developed to demonstrate how to extract predictions from datasets using Machine Learning. Everything that has been done can be applied to different areas such as transportation, education, public security, logistics and so forth...
